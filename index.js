@@ -39,3 +39,80 @@ connection.connect((err) => {
         startPrompt();
     });
 });
+
+function startPrompt() {
+    const startQuestion = [
+        {
+            type: 'list',
+            name: 'action',
+            message: 'What action would you like to take?',
+            loop: false,
+            choices: [
+                "View all employees",
+                "View all roles",
+                "View all departments",
+                "Add an employee",
+                "Add a role",
+                "Add a department",
+                "Update employee role",
+                "Update employee's manager",
+                "View employees by manager",
+                "Delete a department",
+                "Delete a role",
+                "Delete an employee",
+                "View the total budget of a department",
+                "QUIT"
+            ]
+        }
+    ]
+
+    inquirer.prompt(startQuestion)
+    .then(response => {
+        switch(response.action) {
+            case "View all employees":
+                viewAll("EMPLOYEE");
+                break;
+            case "View all roles":
+                viewAll("ROLE");
+                break;
+            case "View all departments":
+                viewAll("DEPARTMENT");
+                break;
+            case "Add an employee":
+                addNewEmployee();
+                break;
+            case "Add a role":
+                addNewRole();
+                break;
+            case "Add a department":
+                addNewDepartment();
+                break;
+            case "Update employee role":
+                updateRole();
+                break;
+            case "Update employee's manager":
+                updateManager();
+                break;
+            case "View employees by manager":
+                viewEmployeeByManager();
+                break;
+            case "Delete a department":
+                deleteDepartment();
+                break;
+            case "Delete a role":
+                deleteRole();
+                break;
+            case "Delete an employee":
+                deleteEmployee();
+                break;
+            case "View the total budget of a department":
+                viewBudget();
+                break;
+                default:
+                    connection.end();
+        }
+    })
+    .catch(err => {
+        console.error(err);
+    });
+}
