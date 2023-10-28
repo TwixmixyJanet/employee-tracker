@@ -6,7 +6,7 @@
 require('dotenv').config();
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const bTable = require('console.table');
+const cTable = require('console.table');
 const figlet = require('figlet');
 const { response } = require('express');
 
@@ -18,10 +18,11 @@ const { response } = require('express');
 
 // connect to the server
 const connection = mysql.createConnection(
-    {
-        host: 'localhost',
+    { // !!You may need to update the below data for your own needs!!
+        host: '127.0.0.1',
+        // port: 3306,
         user: 'root',
-        password: 'process.env.DB_PASSWORD',
+        password: 'pastel',
         database: 'employee_tracker'
     }
 );
@@ -31,7 +32,15 @@ connection.connect((err) => {
     if (err) throw err;
     console.log(`connection made through id ${connection.threadId}
     `);
-    figlet('Employee Tracker', function (err, data) {
+    figlet(
+        `
+        **************
+
+        Employee Tracker
+        
+        **************
+        `
+        , function (err, data) {
         if (err) {
             console.log(`ASCII art not loaded`);
         } else {
