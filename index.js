@@ -116,7 +116,7 @@ function startPrompt() {
     .catch(err => {
         console.error(err);
     });
-}
+};
 
 const viewAll = (table) => {
     let query;
@@ -161,7 +161,7 @@ const addNewDepartment = () => {
     .catch(err => {
         console.error(err);
     })
-}
+};
 
 const addNewRole = () => {
     const departments = []
@@ -208,7 +208,7 @@ const addNewRole = () => {
             console.error(err);
         });
     });
-}
+};
 
 const addNewEmployee = () => {
     connection.query(`SELECT * FROM employee`, (err, emplRes) => {
@@ -280,7 +280,7 @@ const addNewEmployee = () => {
             });
         })
     });
-}
+};
 
 const updateRole = () => {
     connection.query(`SELECT * FROM employee`, (err, emplRes) => {
@@ -344,7 +344,7 @@ const updateRole = () => {
             });
         })
     });
-}
+};
 
 const viewEmployeeByManager = () => {
     connection.query(`SELECT * FROM employee`, (err, emplRes) => {
@@ -398,14 +398,64 @@ const viewEmployeeByManager = () => {
             console.error(err);
         });
     });
-}
+};
 
 const updateManager = () => {
     connection.query(`SELECT * FROM employee`, (err, emplRes) => {
         if (err) throw err;
         const employeeChoice = [];
         emplRes.forEach(({ first_name, last_name, id }) => {
-            
+            employeeChoice.push(
+                {
+                    name: first_name + " " + last_name,
+                    value: id
+                }
+            );
+        });
+
+        const managerChoice = [{
+            name: 'None',
+            value: 0
+        }];
+        emplRes.forEach(({ first_name, last_name, id }) => {
+            managerChoice.push(
+                {
+                    name: first_name + " " + last_name,
+                    value: id
+                }
+            );
+        });
+
+        let questions = [
+            {
+                type: 'list',
+                name: 'id',
+                message: "Which employee do you want to update?",
+                choices: employeeChoice
+            },
+            {
+                type: 'list',
+                name: 'manager_id',
+                message: "Which manager do you select for this employee?",
+                choices: managerChoice
+            }
+        ]
+
+        inquirer.prompt(questions)
+        .then(response => {
+            const query = `UPDATE EMPLOYEE SET ? WHERE id = ?;`;
+            let manager_id = response.manager_id !== 0? response.manager_id: null;
+            connection.query(query, [
+                {manager_id: manager_id},
+                response.id
+            ], (err, res) => {
+                if (err) throw err;
+                console.log(`Successfully updated the employee's manager`);
+                startPrompt();
+            });
         })
+        .catch(err => {
+            console.error(err);
+        });
     })
-}
+};
