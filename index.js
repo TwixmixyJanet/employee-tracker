@@ -31,7 +31,7 @@ connection.connect((err) => {
     if (err) throw err;
     console.log(`connection made through id ${connection.threadId}
     `);
-    figlet('Employee tracker', function (err, data) {
+    figlet('Employee Tracker', function (err, data) {
         if (err) {
             console.log(`ASCII art not loaded`);
         } else {
