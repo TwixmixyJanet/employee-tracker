@@ -487,7 +487,7 @@ const deleteDepartment = () => {
             const query = `DELETE FROM DEPARTMENT WHERE id = ?`;
             connection.query(query, [response.id], (err, res) => {
                 if (err) throw err;
-                console.log(`${res.affectRows} successfully deleted.`);
+                console.log(`${res.affectedRows} successfully deleted.`);
                 startPrompt();
             });
         })
@@ -521,10 +521,18 @@ const deleteRole = () => {
 
         inquirer.prompt(questions)
         .then (response => {
-            
+            const query = `DELETE FROM ROLE WHERE id = ?`;
+            connection.query(query, [response.id], (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} successfully deleted.`);
+                startPrompt();
+            });
         })
-    })
-}
+        .catch(err => {
+            console.error(err);
+        });
+    });
+};
 
 const deleteEmployee = () => {
 
