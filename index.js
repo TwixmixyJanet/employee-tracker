@@ -569,3 +569,45 @@ const deleteEmployee = () => {
         });
     });
 };
+
+const viewBudget = () => {
+    connection.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
+        if (err) throw err;
+
+        const deptChoice = [];
+        res.forEach(({ name, id }) => {
+            deptChoice.push({
+                name: name,
+                value: id
+            });
+        });
+
+        let questions = [
+            {
+                type: 'list',
+                name: 'id',
+                message: "Which department's budget would you like to review?",
+                choices: deptChoice
+            }
+        ];
+
+        inquirer.prompt(questions)
+        .then(response => {
+            const query = `SELECT D.name, SUM(salary) AS budget FROM EMPLOYEE AS E 
+            LEFT JOIN ROLE AS R
+            ON E.role_id = R.id 
+            LEFT JOIN DEPARTMENT AS D 
+            ON R.department_id = D.id
+            WHERE D.id = ?
+            `;
+            connection.query(query, [response.id], (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                startPrompt();
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    });
+};
