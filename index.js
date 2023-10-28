@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 const figlet = require('figlet');
+const chalk = require('chalk');
 
 // connect to the server
 const connection = mysql.createConnection(
@@ -152,7 +153,7 @@ const addNewDepartment = () => {
         const query = `INSERT INTO department (name)  VALUE (?)`;
         connection.query(query, [response.name], (err, res) => {
             if (err) throw err;
-            console.log(`Successfully added ${response.name} department with an ID of ${res.insertId}`);
+            console.log(chalk`Successfully added {magentaBright ${response.name}} department with an ID of ${res.insertId}`);
             startMainMenu();
         });
     })
@@ -198,7 +199,7 @@ const addNewRole = () => {
             const query = `INSERT INTO ROLE (title, salary, department_id) VALUES (?)`;
             connection.query(query, [[response.title, response.salary, response.department]], (err, res) => {
                 if (err) throw err;
-                console.log(`Successfully added ${response.title} role with an ID of ${res.insertId}`);
+                console.log(chalk`Successfully added {magentaBright ${response.title}} role with an ID of ${res.insertId}`);
                 startMainMenu();
             });
         })
@@ -269,7 +270,7 @@ const addNewEmployee = () => {
                 let manager_id = response.manager_id !== 0? response.manager_id: null;
                 connection.query(query, [[response.first_name, response.last_name, response.role_id, manager_id]], (err, res) => {
                     if (err) throw err;
-                    console.log(`Successfully added employee ${response.first_name} ${response.last_name} with an ID of ${res.insertId}`);
+                    console.log(chalk`Successfully added employee {magentaBright ${response.first_name} ${response.last_name}} with an ID of ${res.insertId}`);
                     startMainMenu();
                 });
             })
