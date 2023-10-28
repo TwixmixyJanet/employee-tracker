@@ -8,6 +8,7 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const bTable = require('console.table');
 const figlet = require('figlet');
+const { response } = require('express');
 
 // db connect error
 // db.connect(err => {
@@ -114,5 +115,97 @@ function startPrompt() {
     })
     .catch(err => {
         console.error(err);
+    });
+}
+
+const viewAll = (table) => {
+    let query;
+    if (table === "DEPARTMENT") {
+        query = `SELECT * FROM department`;
+    } else if (table === "ROLE") {
+        query = `SELECT R.id AS id, title, salary, D.name as department FROM ROLE AS R LEFT JOIN DEPARTMENT AS D ON R.department_id = D.id;`;
+    } else {
+        query = `SELECT E.id AS id, E.first_name AS first_name, E.last_name AS last_name, R.title AS role, D.name AS department, CONCAT(M.first_name, " ", M.last_name) AS manager
+        FROM EMPLOYEE AS E
+        LEFT JOIN ROLE AS R ON E.role_id = R.id
+        LEFT JOIN DEPARTMENT AS D ON R.department_id = D.id
+        LEFT JOIN EMPLOYEE AS M ON E.manager_id = M.id;`;
+    }
+
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+
+        startPrompt();
+    });
+};
+
+const addNewDepartment = () => {
+    let questions = [
+        {
+            type: 'input',
+            name: 'name',
+            message: "What is department name?"
+        }
+    ];
+
+    inquirer.prompt(questions)
+    .then(response => {
+        const query = `INSERT INTO department (name)  VALUE (?)`;
+        connection.query(query, [response.name], (err, res) => {
+            if (err) throw err;
+            console.log(`Successfully added ${response.name} department with an ID of ${res.insertId}`);
+            startPrompt();
+        });
+    })
+    .catch(err => {
+        console.error(err);
+    })
+}
+
+const addNewRole = () => {
+    const departments = []
+    connection.query(`SELECT * FROM department`, (err, res) => {
+        if (err) throw err;
+
+        res.forEach(dep => {
+            let qObj = {
+                name: dep.name,
+                value: dep.id
+            }
+            departments.push(qObj);
+        });
+
+        let questions = [
+            {
+                type: 'input',
+                name: 'title',
+                message: "What is the role name?"
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: "What is the salary of the role?"
+            },
+            {
+                type: 'list',
+                name: 'department',
+                message: "Which department is this role?",
+                choices: departments
+            }
+        ];
+
+        inquirer.prompt(questions)
+        .then(response => {
+            const query = `INSERT INTO ROLE (title, salary, department_id) VALUES (?)`;
+            connection.query(query, [[response.title, response.salary, response.department]], (err, res) => {
+                if (err) throw err;
+                console.log(`Successfully added ${response.title} role with an ID of ${res.insertId}`);
+                startPrompt();
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
     });
 }
