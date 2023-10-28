@@ -1,20 +1,9 @@
-// coded myself into a corner... commenting these out to try something else
-// const db = require('./db/mysql');
-// const cmsMenu = require('./lib/inquirer');
-
 // NPM packages to potentially use
 require('dotenv').config();
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 const figlet = require('figlet');
-// const { response } = require('express');
-
-// db connect error
-// db.connect(err => {
-//     console.log(err);
-//     if (err) throw err;
-// })
 
 // connect to the server
 const connection = mysql.createConnection(
