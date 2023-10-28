@@ -35,12 +35,12 @@ connection.connect((err) => {
         } else {
             console.log(data);
         }
-        startPrompt();
+        startMainMenu();
     });
 });
 
-function startPrompt() {
-    const startQuestion = [
+function startMainMenu() {
+    const mainMenu = [
         {
             type: 'list',
             name: 'action',
@@ -50,12 +50,12 @@ function startPrompt() {
                 "View all employees",
                 "View all roles",
                 "View all departments",
+                "View employees by manager",
                 "Add an employee",
                 "Add a role",
                 "Add a department",
                 "Update employee role",
                 "Update employee's manager",
-                "View employees by manager",
                 "Delete a department",
                 "Delete a role",
                 "Delete an employee",
@@ -65,17 +65,17 @@ function startPrompt() {
         }
     ]
 
-    inquirer.prompt(startQuestion)
+    inquirer.prompt(mainMenu)
     .then(response => {
         switch(response.action) {
             case "View all employees":
-                viewAll("EMPLOYEE");
+                viewReport("EMPLOYEE");
                 break;
             case "View all roles":
-                viewAll("ROLE");
+                viewReport("ROLE");
                 break;
             case "View all departments":
-                viewAll("DEPARTMENT");
+                viewReport("DEPARTMENT");
                 break;
             case "Add an employee":
                 addNewEmployee();
@@ -93,7 +93,7 @@ function startPrompt() {
                 updateManager();
                 break;
             case "View employees by manager":
-                viewEmployeeByManager();
+                viewEmployeeManagerReport();
                 break;
             case "Delete a department":
                 deleteDepartment();
@@ -105,7 +105,7 @@ function startPrompt() {
                 deleteEmployee();
                 break;
             case "View the total budget of a department":
-                viewBudget();
+                viewDepartmentBudgetReport();
                 break;
                 default:
                     connection.end();
@@ -116,7 +116,7 @@ function startPrompt() {
     });
 };
 
-const viewAll = (table) => {
+const viewReport = (table) => {
     let query;
     if (table === "DEPARTMENT") {
         query = `SELECT * FROM department`;
@@ -134,7 +134,7 @@ const viewAll = (table) => {
         if (err) throw err;
         console.table(res);
 
-        startPrompt();
+        startMainMenu();
     });
 };
 
@@ -153,7 +153,7 @@ const addNewDepartment = () => {
         connection.query(query, [response.name], (err, res) => {
             if (err) throw err;
             console.log(`Successfully added ${response.name} department with an ID of ${res.insertId}`);
-            startPrompt();
+            startMainMenu();
         });
     })
     .catch(err => {
@@ -199,7 +199,7 @@ const addNewRole = () => {
             connection.query(query, [[response.title, response.salary, response.department]], (err, res) => {
                 if (err) throw err;
                 console.log(`Successfully added ${response.title} role with an ID of ${res.insertId}`);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
@@ -209,16 +209,16 @@ const addNewRole = () => {
 };
 
 const addNewEmployee = () => {
-    connection.query(`SELECT * FROM employee`, (err, emplRes) => {
+    connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
-        const employeeChoice = [
+        const selectEmployee = [
             {
                 name: 'None',
                 value: 0
             }
         ];
-        emplRes.forEach(({ first_name, last_name, id }) => {
-            employeeChoice.push(
+        employeeResponse.forEach(({ first_name, last_name, id }) => {
+            selectEmployee.push(
                 {
                     name: first_name + " " + last_name,
                     value: id
@@ -226,11 +226,11 @@ const addNewEmployee = () => {
             );
         });
 
-        connection.query(`SELECT * FROM role`, (err, rolRes) => {
+        connection.query(`SELECT * FROM role`, (err, roleResponse) => {
             if (err) throw err;
-            const roleChoice = [];
-            rolRes.forEach(({ title, id }) => {
-                roleChoice.push(
+            const selectRole = [];
+            roleResponse.forEach(({ title, id }) => {
+                selectRole.push(
                     {
                         name: title,
                         value: id
@@ -253,13 +253,13 @@ const addNewEmployee = () => {
                     type: 'list',
                     name: 'role_id',
                     message: "What's the employee's role?",
-                    choices: roleChoice
+                    choices: selectRole
                 },
                 {
                     type: 'list',
                     name: 'manager_id',
                     message: "Select the emplyee's manager (if they have one)",
-                    choices: employeeChoice
+                    choices: selectEmployee
                 }
             ]
 
@@ -270,7 +270,7 @@ const addNewEmployee = () => {
                 connection.query(query, [[response.first_name, response.last_name, response.role_id, manager_id]], (err, res) => {
                     if (err) throw err;
                     console.log(`Successfully added employee ${response.first_name} ${response.last_name} with an ID of ${res.insertId}`);
-                    startPrompt();
+                    startMainMenu();
                 });
             })
             .catch(err => {
@@ -281,11 +281,11 @@ const addNewEmployee = () => {
 };
 
 const updateRole = () => {
-    connection.query(`SELECT * FROM employee`, (err, emplRes) => {
+    connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
-        const employeeChoice = [];
-        emplRes.forEach(({ first_name, last_name, id }) => {
-            employeeChoice.push(
+        const selectEmployee = [];
+        employeeResponse.forEach(({ first_name, last_name, id }) => {
+            selectEmployee.push(
                 {
                     name: first_name + " " + last_name,
                     value: id
@@ -293,11 +293,11 @@ const updateRole = () => {
             );
         });
 
-        connection.query(`SELECT * FROM role`, (err, rolRes) => {
+        connection.query(`SELECT * FROM role`, (err, roleResponse) => {
             if (err) throw err;
-            const roleChoice = [];
-            rolRes.forEach(({ title, id }) => {
-                roleChoice.push(
+            const selectRole = [];
+            roleResponse.forEach(({ title, id }) => {
+                selectRole.push(
                     {
                         name: title,
                         value: id
@@ -310,13 +310,13 @@ const updateRole = () => {
                     type: 'list',
                     name: 'id',
                     message: "Which employee's role do you want to update?",
-                    choices: employeeChoice
+                    choices: selectEmployee
                 },
                 {
                     type: 'list',
                     name: 'role_id',
                     message: "What is the employee's new role?",
-                    choices: roleChoice
+                    choices: selectRole
                 }
             ]
 
@@ -333,7 +333,7 @@ const updateRole = () => {
                         if (err) throw err;
 
                         console.log(`Successfully update employee's role to ${response.role_id}`);
-                        startPrompt();
+                        startMainMenu();
                     }
                 );
             })
@@ -345,11 +345,11 @@ const updateRole = () => {
 };
 
 const updateManager = () => {
-    connection.query(`SELECT * FROM employee`, (err, emplRes) => {
+    connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
-        const employeeChoice = [];
-        emplRes.forEach(({ first_name, last_name, id }) => {
-            employeeChoice.push(
+        const selectEmployee = [];
+        employeeResponse.forEach(({ first_name, last_name, id }) => {
+            selectEmployee.push(
                 {
                     name: first_name + " " + last_name,
                     value: id
@@ -357,12 +357,12 @@ const updateManager = () => {
             );
         });
 
-        const managerChoice = [{
+        const selectManager = [{
             name: 'None',
             value: 0
         }];
-        emplRes.forEach(({ first_name, last_name, id }) => {
-            managerChoice.push(
+        employeeResponse.forEach(({ first_name, last_name, id }) => {
+            selectManager.push(
                 {
                     name: first_name + " " + last_name,
                     value: id
@@ -375,13 +375,13 @@ const updateManager = () => {
                 type: 'list',
                 name: 'id',
                 message: "Which employee do you want to update?",
-                choices: employeeChoice
+                choices: selectEmployee
             },
             {
                 type: 'list',
                 name: 'manager_id',
                 message: "Which manager do you select for this employee?",
-                choices: managerChoice
+                choices: selectManager
             }
         ]
 
@@ -395,7 +395,7 @@ const updateManager = () => {
             ], (err, res) => {
                 if (err) throw err;
                 console.log(`Successfully updated the employee's manager`);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
@@ -404,17 +404,17 @@ const updateManager = () => {
     })
 };
 
-const viewEmployeeByManager = () => {
-    connection.query(`SELECT * FROM employee`, (err, emplRes) => {
+const viewEmployeeManagerReport = () => {
+    connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
-        const employeeChoice = [
+        const selectEmployee = [
             {
                 name: 'None',
                 value: 0
             }
         ];
-        emplRes.forEach(({ first_name, last_name, id }) => {
-            employeeChoice.push(
+        employeeResponse.forEach(({ first_name, last_name, id }) => {
+            selectEmployee.push(
                 {
                     name: first_name + " " + last_name,
                     value: id
@@ -427,7 +427,7 @@ const viewEmployeeByManager = () => {
                 type: 'list',
                 name: 'manager_id',
                 message: "Which do you want to view?",
-                choices: employeeChoice
+                choices: selectEmployee
             }
         ]
 
@@ -456,10 +456,10 @@ const viewEmployeeByManager = () => {
                 console.table(res);
                 
                 setTimeout(function() {
-                    // This is giving time for the table to load before the startPrompt executes.
+                    // This is giving time for the table to load before the startMainMenu executes.
                 }, 1000)
 
-                startPrompt();
+                startMainMenu();
                 
                 
             });
@@ -498,7 +498,7 @@ const deleteDepartment = () => {
             connection.query(query, [response.id], (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} successfully deleted.`);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
@@ -512,9 +512,9 @@ const deleteRole = () => {
     connection.query(`SELECT * FROM ROLE`, (err, res) => {
         if (err) throw err;
 
-        const roleChoice = [];
+        const selectRole = [];
         res.forEach(({ title, id }) => {
-            roleChoice.push({
+            selectRole.push({
                 name: title,
                 value: id
             });
@@ -525,7 +525,7 @@ const deleteRole = () => {
                 type: 'list',
                 name: 'id',
                 message: "Which role do you want to delete?",
-                choices: roleChoice
+                choices: selectRole
             }
         ];
 
@@ -535,7 +535,7 @@ const deleteRole = () => {
             connection.query(query, [response.id], (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} successfully deleted.`);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
@@ -548,9 +548,9 @@ const deleteEmployee = () => {
     connection.query(`SELECT * FROM EMPLOYEE`, (err, res) => {
         if (err) throw err;
 
-        const employeeChoice = [];
+        const selectEmployee = [];
         res.forEach(({ first_name, last_name, id }) => {
-            employeeChoice.push({
+            selectEmployee.push({
                 name: first_name + " " + last_name,
                 value: id
             });
@@ -561,7 +561,7 @@ const deleteEmployee = () => {
                 type: 'list',
                 name: 'id',
                 message: "Which employee do you want to delete?",
-                choices: employeeChoice
+                choices: selectEmployee
             }
         ];
 
@@ -571,7 +571,7 @@ const deleteEmployee = () => {
             connection.query(query, [response.id], (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} successfully deleted.`);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
@@ -580,13 +580,13 @@ const deleteEmployee = () => {
     });
 };
 
-const viewBudget = () => {
+const viewDepartmentBudgetReport = () => {
     connection.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
         if (err) throw err;
 
-        const deptChoice = [];
+        const selectDepartment = [];
         res.forEach(({ name, id }) => {
-            deptChoice.push({
+            selectDepartment.push({
                 name: name,
                 value: id
             });
@@ -597,7 +597,7 @@ const viewBudget = () => {
                 type: 'list',
                 name: 'id',
                 message: "Which department's budget would you like to review?",
-                choices: deptChoice
+                choices: selectDepartment
             }
         ];
 
@@ -613,7 +613,7 @@ const viewBudget = () => {
             connection.query(query, [response.id], (err, res) => {
                 if (err) throw err;
                 console.table(res);
-                startPrompt();
+                startMainMenu();
             });
         })
         .catch(err => {
