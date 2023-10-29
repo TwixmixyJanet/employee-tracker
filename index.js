@@ -1,10 +1,10 @@
 // NPM packages to potentially use
 require('dotenv').config();
-const mysql = require('mysql2');
-const inquirer = require('inquirer');
-const cTable = require('console.table');
-const figlet = require('figlet');
-const chalk = require('chalk');
+const mysql = require('mysql2'); // to create the mysql connection
+const inquirer = require('inquirer'); // to allow for prompts in the terminal
+const cTable = require('console.table'); // to display reports in a table easily
+const figlet = require('figlet'); // to have a fun header
+const chalk = require('chalk'); // to add color in the app
 
 // connect to the server
 const connection = mysql.createConnection(
@@ -19,7 +19,7 @@ const connection = mysql.createConnection(
 
 // connect to the database
 connection.connect((err) => {
-    if (err) throw err;
+    if (err) throw err; // IF errors and .catch errors placed throughout the system to catch potential issues for the development process and for the user, if needed.
     console.log(`connection made through id ${connection.threadId}
     `);
     figlet(
@@ -31,22 +31,23 @@ connection.connect((err) => {
         **************
         `
         , function (err, data) {
-        if (err) {
+        if (err) { 
             console.log(`ASCII art not loaded`);
         } else {
             console.log(data);
         }
-        startMainMenu();
+        startMainMenu(); // initial start of the prompt main menu questions
     });
 });
 
+// The content management system heavily relies on the prompt questions
 function startMainMenu() {
     const mainMenu = [
         {
             type: 'list',
             name: 'action',
             message: 'What action would you like to take?',
-            loop: false,
+            loop: false, // set to false so I could be in charge of when user is re-routed to main menu
             choices: [
                 "View all employees",
                 "View all roles",
@@ -66,9 +67,9 @@ function startMainMenu() {
         }
     ]
 
-    inquirer.prompt(mainMenu)
+    inquirer.prompt(mainMenu) // creating a course of actions base off of main menu selection
     .then(response => {
-        switch(response.action) {
+        switch(response.action) { // using the switch statement method instead of IF statements
             case "View all employees":
                 viewReport("EMPLOYEE");
                 break;
@@ -108,7 +109,7 @@ function startMainMenu() {
             case "View the total budget of a department":
                 viewDepartmentBudgetReport();
                 break;
-                default:
+                default: // If the user selects Quit, then the connection will end
                     connection.end();
         }
     })
@@ -117,6 +118,11 @@ function startMainMenu() {
     });
 };
 
+// A catch all report for if they user selects department, role, or employee
+// Because it was combined and required joining of tables, it required research into how to call on and display the SQL data.
+// For example (the "ROLE" table), R.id AS id gives the id column an alias for the role's table and to avoid name collision.
+// LEFT JOIN ensures that it will return all rows from the role table, even if there is no matching row in the department table.
+// ON R.department_id = D.id specifies the join condition. For this case, the two tables are joined on the department_id column.
 const viewReport = (table) => {
     let query;
     if (table === "DEPARTMENT") {
@@ -131,6 +137,7 @@ const viewReport = (table) => {
         LEFT JOIN EMPLOYEE AS M ON E.manager_id = M.id;`;
     }
 
+// This function makes a query against the database connection. The SQL qeury and the callback function, calling on the cb whent he query finishes executing. First it's checking to see if there are any errors, if not it uses the console.table to display the report data.
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.table(res);
@@ -139,6 +146,7 @@ const viewReport = (table) => {
     });
 };
 
+// There are functions for all potential additions to the database. They all function the same way. Using inquirer it prompts the user for information. Then it uses a query to send a SQL command to the database. If there is no error then it will respond with a console log message saying it's successful and then it returns to the main menu.
 const addNewDepartment = () => {
     let questions = [
         {
@@ -153,6 +161,7 @@ const addNewDepartment = () => {
         const query = `INSERT INTO department (name)  VALUE (?)`;
         connection.query(query, [response.name], (err, res) => {
             if (err) throw err;
+            // Used the chalk NPM to add some color highlight to some of the console logs when data was added
             console.log(chalk`Successfully added {magentaBright ${response.name}} department with an ID of ${res.insertId}`);
             startMainMenu();
         });
@@ -162,6 +171,7 @@ const addNewDepartment = () => {
     })
 };
 
+// Add role and add employee have another layer of complexity because they need to have questions based off of referential data in the system. At the beginning of each function there is a call to the database to find the existing referential data and that is then pushed to display as part of the question "which department" (for example). This way the latest department and role data will always be up to date when adding a new role or a new employee. From there it's the same as the function above.
 const addNewRole = () => {
     const departments = []
     connection.query(`SELECT * FROM department`, (err, res) => {
@@ -267,6 +277,7 @@ const addNewEmployee = () => {
             inquirer.prompt(questions)
             .then(response => {
                 const query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)`;
+                // Not everyone needs a manager, If the response give is not equal to zero then it will assign the proper manager id correlation. Otherwise it sets the value to null.
                 let manager_id = response.manager_id !== 0? response.manager_id: null;
                 connection.query(query, [[response.first_name, response.last_name, response.role_id, manager_id]], (err, res) => {
                     if (err) throw err;
@@ -281,6 +292,7 @@ const addNewEmployee = () => {
     });
 };
 
+// Much like above when needing to pull data from the db, when updating information about an employees role or a role's department, it also needs to query the db. First it needs to request the employees to select from to update their role, then it needs to make a request to pull the roles available. After querying the db, the information is pushed to display in the prompt. It then updates the refential data accordingly.
 const updateRole = () => {
     connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
@@ -405,6 +417,7 @@ const updateManager = () => {
     })
 };
 
+// To display a manager's employees report, much like the functions above it needs to make a query to the database to ask which manager the report is on. Once the prompt selection is made, then the report data can be displayed based off the ID selected. The SQL statements are much like from the viewReports function and specifics about them are broken down above.
 const viewEmployeeManagerReport = () => {
     connection.query(`SELECT * FROM employee`, (err, employeeResponse) => {
         if (err) throw err;
@@ -471,6 +484,7 @@ const viewEmployeeManagerReport = () => {
     });
 };
 
+// Much like the add and edit functions, the delete function also requires a query to the database to begin with. Once the selection is made, the SQL statement can be executed to delete that line of data from the db.
 const deleteDepartment = () => {
     const departments = [];
     connection.query(`SELECT * FROM department`, (err, res) => {
@@ -581,6 +595,7 @@ const deleteEmployee = () => {
     });
 };
 
+// Same as the report function with a combination of pretty much every other function above. First query the database, then issue the SQL statement to display the report.
 const viewDepartmentBudgetReport = () => {
     connection.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
         if (err) throw err;
