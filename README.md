@@ -1,6 +1,6 @@
 # JANET'S EMPLOYEE TRACKER
 
-### [View Project Video Here](https:// "JANET'S EMPLOYEE TRACKER")<br />
+### [View Project Video Here](https://drive.google.com/file/d/11VroiLqe0b5WRzCZsikd5bFBjEJsDMmF/view?usp=sharing "JANET'S EMPLOYEE TRACKER")<br />
 ![image of JANET'S EMPLOYEE TRACKER](assets/img/projectimage.png "image of JANET'S EMPLOYEE TRACKER")
 | Technology Used    | Resource URL |
 | --------  | ------- |
