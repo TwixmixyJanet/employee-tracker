@@ -2,13 +2,16 @@
 require('dotenv').config();
 const mysql = require('mysql2'); // to create the mysql connection
 const inquirer = require('inquirer'); // to allow for prompts in the terminal
-const cTable = require('console.table'); // to display reports in a table easily
+const cTable = require('console.table'); // better tble display for any reports
 const figlet = require('figlet'); // to have a fun header
 const chalk = require('chalk'); // to add color in the app
 
 // connect to the server
 const connection = mysql.createConnection(
-    { // !!You may need to update the below data for your own needs!!
+    { 
+        //////////////////////////////////////////////////////////////
+        // !!You need to update the below data for your own needs!!//
+        ////////////////////////////////////////////////////////////
         host: '127.0.0.1',
         // port: 3306,
         user: 'root',

@@ -1,13 +1,13 @@
 # JANET'S EMPLOYEE TRACKER
 
-### [View Project Video Here](https://drive.google.com/file/d/1F6zg5ufYqPWxx0FiAr8zQV_URiC3A96D/view?usp=sharing "JANET'S EMPLOYEE TRACKER")<br />
+### [View Project Video Here](https:// "JANET'S EMPLOYEE TRACKER")<br />
 ![image of JANET'S EMPLOYEE TRACKER](assets/img/projectimage.png "image of JANET'S EMPLOYEE TRACKER")
 | Technology Used    | Resource URL |
 | --------  | ------- |
 | NodeJS      | https://nodejs.org/en |
 | Inquirer      | https://www.npmjs.com/package/inquirer |
-| FS      | https://nodejs.org/api/fs.html |
-| Jest      | https://jestjs.io/ |
+| MySQL      | https://www.mysql.com/ |
+| mysql2      | https://www.npmjs.com/package/mysql2 |
 | Screencastify | https://www.screencastify.com/ |
 | JavaScript | https://developer.mozilla.org/en-US/docs/Web/JavaScript |
 | Git       | https://git-scm.com/ |
@@ -23,7 +23,7 @@
 * [License](#license)
 
 ## Description:
-This application acts as a wizard to create an SVG logo.<br />
+This employee tracker application acts as a content management system that is run through NodeJS CLI.<br />
 <br />
 
 #### How to use this app:
@@ -35,12 +35,16 @@ This application acts as a wizard to create an SVG logo.<br />
 * Installation:
   * Clone the repo to your device 
   * Initiate NPM 
-  * Install inquirer 
-  * Install chalk
+  * Install all dependencies
+  * IMPORTANT: Use MySQL to SOURCE schema.sql and seeds.sql
 * Open Integrated Terminal (CLI) 
-* type "node index.js" 
-* Follow the question prompts until complete 
-* Retrieve file from 'examples' folder
+* type "npm start" 
+* Follow the question prompts to make necessary updates
+  * View Departments, Roles, and Employees
+  * View manager and budget reports
+  * Add Department, Role, and Employee
+  * Delete Employee, Role, and Department
+* To end the program select "Quit" at the bottom of the main menu
 
 ### User Story
 
@@ -74,30 +78,34 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 ### Lessons Learned
 
-#### 1. SVG
-For this project I learned about scalable vector graphics and how to generate them through class objects. Through the SVG element each basic shape needed to have a element of either circle, rect or polygon. From there it was about defining their characteristics to set the size, dimensions, and color (via fill). Through SVG there's also the ability to set the text to display as well, with it's own parameters. Template literals were used to pass through the colors and the text.
+#### 1. mysql2 -> connection
+For this project it required a mysql server connection. This was accomplished through using the mysql2 NPM. The connection was essential in sending queries to the SQL database. Because of this need it was used prolifically throughout the application. Here are a few examples.
 <br />
 ![lesson 1](assets/img/lesson1.png)
+![lesson 1](assets/img/lesson1b.png)
+![lesson 1](assets/img/lesson1c.png)
+![lesson 1](assets/img/lesson1d.png)
+![lesson 1](assets/img/lesson1e.png)
 
-#### 2. Jest
-Jest is an NPM for testing. I used this to test my shape modules. It takes some time to figure out the syntax, while allowing the ability to test modules individually to check their ability. 
+#### 2. SQL Reports
+Building reports with SQL is super powerful, but also very difficult. This required a lot of research to determine how to best layout this information. For all of the view (department, role, employee), I combined into one action and used an if statement to determine what would display.
 <br />
 ![lesson 2](assets/img/lesson2.png)
 ![lesson 2](assets/img/lesson2b.png)
 
-#### 3. Class / Inheritance
-Through our OOP classes we learned about Classes. These were essential to building this project. For the shapes I started with a parent shape that I could then pass the properties down to each type of shape.
+#### 3. Insert queries with placeholders
+The question mark (?) and other placeholders can be used to insert values into the db using parameterized queries. This helps to prevent bad data injection attacks and makes the code more reusable.
 <br />
 ![lesson 3](assets/img/lesson3.png)
-![lesson 3](assets/img/lesson3b.png)
 
-#### 4. Chalk (bonus!)
-This one was just for fun because I wanted to spice up the text in my terminal. Chalk provides some predefined colors, highlights, bold, italics and other alteration capabilities.
+#### 4. Quering data to push it
+To keep the content management system live and reactive it required being able to pull on the data already in the system, so that we could then push the current available options to the prompts when needed. This was done through a query connection and then for each object item they were pushed to a variable, which then was used to display the questino options. See the example below.
 <br />
 ![lesson 4](assets/img/lesson4.png)
+![lesson 4](assets/img/lesson4b.png)
 
 #### Synopsis
-Overall this was a fun project. It was difficult to turn around and immediately use the OOP lessons, but definitely necessary to accomplish the needs of this project. 
+This project was difficult. It required me reviewing all of the code drills and lessons to determine how to accomplish that. Even with that I still had to do research to figure out how things worked and needed to work. I did end up having fun adding a couple aspects like figlet and chalk and cTables to improve the user experience.
 
 ## Installation
 
@@ -111,7 +119,7 @@ Overall this was a fun project. It was difficult to turn around and immediately 
 
 ## Usage
 
-This is a SVG logo generator app. If you would like to use this app follow the installation steps and curate it to your needs. If you would like to use this app to create your SVG logo files, follow the steps under the description above and click the link at the top of this page.
+This is a content management app for employee tracking. If you would like to use this app follow the installation steps and curate it to your needs. If you would like to use this app, follow the steps under the description above and click the link at the top of this page.
 
 ## License
 
