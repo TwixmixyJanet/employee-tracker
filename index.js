@@ -15,7 +15,7 @@ const connection = mysql.createConnection(
         host: '127.0.0.1',
         // port: 3306,
         user: 'root',
-        password: '', // enter a password
+        password: 'pastel', // enter a password
         database: 'employee_tracker'
     }
 );
@@ -56,6 +56,8 @@ function startMainMenu() {
                 "View all roles",
                 "View all departments",
                 "View employees by manager",
+                "View employees by department",
+                "View the total budget of a department",
                 "Add an employee",
                 "Add a role",
                 "Add a department",
@@ -64,7 +66,6 @@ function startMainMenu() {
                 "Delete a department",
                 "Delete a role",
                 "Delete an employee",
-                "View the total budget of a department",
                 "QUIT"
             ]
         }
@@ -99,6 +100,9 @@ function startMainMenu() {
                 break;
             case "View employees by manager":
                 viewEmployeeManagerReport();
+                break;
+            case "View employees by department":
+                viewEmployeeDepartmentReport();
                 break;
             case "Delete a department":
                 deleteDepartment();
@@ -468,6 +472,63 @@ const viewEmployeeManagerReport = () => {
                 WHERE E.manager_id is null;`;
             }
             connection.query(query, [response.manager_id], (err, res) => {
+                if (err) throw err;
+
+                console.table(res);
+                
+                setTimeout(function() {
+                    // This is giving time for the table to load before the startMainMenu executes.
+                }, 1000)
+
+                startMainMenu();
+                
+                
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    });
+};
+
+const viewEmployeeDepartmentReport = () => {
+    connection.query(`SELECT * FROM department`, (err, departmentRespose) => {
+        if (err) throw err;
+        const selectDepartment = [
+            {
+                name: 'None',
+                value: 0
+            }
+        ];
+        departmentRespose.forEach(({ name }) => {
+            selectDepartment.push(
+                {
+                    name: name,
+                }
+            );
+        });
+
+        let questions = [
+            {
+                type: 'list',
+                name: 'departmentName',
+                message: "Which do you want to view?",
+                choices: selectDepartment
+            }
+        ]
+
+        inquirer.prompt(questions)
+        .then(response => {
+            const query = `
+            SELECT employee.first_name, 
+            employee.last_name, 
+            department.name AS department
+            FROM employee 
+            LEFT JOIN role ON employee.role_id = role.id 
+            LEFT JOIN department ON role.department_id = department.id
+            WHERE name = ?;
+            `;
+            connection.query(query, [response.departmentName], (err, res) => {
                 if (err) throw err;
 
                 console.table(res);
